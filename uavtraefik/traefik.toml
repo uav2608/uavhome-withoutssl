@@ -20,6 +20,8 @@
   format = "json"
 
 debug = true
+#keepTrailingSlash = false
+
 
 logLevel = "DEBUG" #"ERROR" #DEBUG, INFO, WARN, ERROR, FATAL, PANIC
 
@@ -79,3 +81,19 @@ network = "uavhanet"
 # This will hide all docker containers that don't have explicitly
 # set label to "enable"
 ExposedRyDefault = false
+
+
+
+#[frontends]
+#  [frontends.hass]
+#  backend = "hass"
+#    [frontends.hass.routes.frontend_latest]
+#    rule = "Path: /frontend_latest"
+
+#[backends]
+#  [backends.hass]
+#    [backends.hass.servers.website]
+#    url = "https://1.2.3.4"
+#  [backends.error]
+#    [backends.error.servers.error]
+#    url = "http://2.3.4.5"
