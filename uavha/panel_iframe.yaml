@@ -1,0 +1,10 @@
+#tasmoadmin:
+#  title: "TasmoAdmin"
+#  url: "http://10.0.0.40:80"
+#  icon: mdi:home-automation
+
+#nodered:
+##  title: "Node-Red"
+##  url: "http://10.0.0.172:1880"
+##  icon: mdi:nodejs
+#

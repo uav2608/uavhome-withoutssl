@@ -165,9 +165,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${USERDIR}/dockerha/shared:/shared
 #      - ${USERDIR}/dockerha/cert:/cert
-    ports:
-      - "8123:8123"
-#    privileged: true
+#    ports:
+#      - "8123:8123"
+    privileged: true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -176,22 +176,32 @@ services:
       - ${NETWORK_NAME}
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=homeassistant"
 #      - "traefik.frontend.rule=Host:hass.${DOMAINNAME}"
-      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /homeassistant"
+#     - "traefik.frontend.rule=Host:${DOMAINNAME};PathPrefixStrip:/homeassistant"
+      - "traefik.backend=homeassistant"
       - "traefik.port=8123"
 #      - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.frontend.entryPoints=http"
+#     - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}"
+#      - "traefik.frontend.rule=PathPrefixStrip:/homeassistant, HostRegexp:{catchall:.*}"
+#      - "traefik.passHostHeader=true"
+      - "traefik.frontend.rule=PathPrefixStrip:/homeassistant"
+#      - "traefik.frontend.rule=PathPrefix:/homeassistant;ReplacePathRegex: ^/(.*)"
+#      - "traefik.frontend.redirect=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.rule=HostRegexp:/homeassistant,{catchall:.*}"
+#      - "traefik.frontend.whiteList.useXForwardedFor=true"
+#      - "traefik.frontend.passHostHeader=true"
 #      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
 #      - "traefik.frontend.priority=1"
-#      - "traefik.frontend.headers.STSSeconds=315360000"
-#      - "traefik.frontend.headers.browserXSSFilter=true"
-#      - "traefik.frontend.headers.contentTypeNosniff=true"
-#      - "traefik.frontend.headers.forceSTSHeader=true"
+      - "traefik.frontend.headers.STSSeconds=315360000"
+      - "traefik.frontend.headers.browserXSSFilter=true"
+      - "traefik.frontend.headers.contentTypeNosniff=true"
+      - "traefik.frontend.headers.forceSTSHeader=true"
 #      - "traefik.frontend.headers.SSLHost=host"
-#      - "traefik.frontend.headers.STSIncludeSubdomains=true"
-#      - "traefik.frontend.headers.STSPreload=true"
-#      - "traefik.frontend.headers.frameDeny=true"
+      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+      - "traefik.frontend.headers.STSPreload=true"
+      - "traefik.frontend.headers.frameDeny=true"
 
 
 # NextCloud – Your Own Cloud Storage
@@ -213,13 +223,15 @@ services:
     networks:
       - ${NETWORK_NAME}
 #        - uavhanet
+    depends_on:
+      - mariadb
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=nextcloud"
+      - "traefik.backend=uavnextcloud"
 #        - "traefik.frontend.rule=Host:nextcloud.${DOMAINNAME}"
-      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /nextcloud"
-      - "traefik.port=443"
-      - "traefik.protocol=https"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /uavnextcloud"
+      - "traefik.port=8888"
+      - "traefik.protocol=http"
 #      - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.frontend.entryPoints=http"
 #      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
@@ -330,6 +342,9 @@ services:
         mode: host
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_DATABASE}
+      - MYSQL_USER=${USER_NEXTCLOUD}
+      - MYSQL_PASSWORD=${PASS_NEXTCLOUD}
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
