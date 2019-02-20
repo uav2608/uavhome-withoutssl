@@ -206,17 +206,18 @@ services:
 
 # NextCloud – Your Own Cloud Storage
   nextcloud:
-    image: linuxserver/nextcloud
+    image: nextcloud
     container_name: nextcloud
     domainname: ${DOMAINNAME}
     hostname: nextcloud
 #      restart: always
     volumes:
-      - ${USERDIR}/dockerha/uavnextcloud:/config
+      - ${USERDIR}/dockerha/uavnextcloud:/var/www/html
       - ${USERDIR}/dockerha/shared:/shared
+      - /etc/localtime:/etc/localtime:ro
 #      - ${USERDIR}/dockerha/cert:/cert
 #    ports:
-#      - "444:443"
+#      - "9001:9001"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -227,15 +228,15 @@ services:
       - mariadb
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=uavnextcloud"
+      - "traefik.backend=nextcloud"
 #        - "traefik.frontend.rule=Host:nextcloud.${DOMAINNAME}"
-      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /uavnextcloud"
-      - "traefik.port=8888"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /nextcloud"
+      - "traefik.port=80"
       - "traefik.protocol=http"
 #      - "traefik.frontend.headers.SSLRedirect=true"
       - "traefik.frontend.entryPoints=http"
-#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
-#      - "traefik.frontend.priority=1"
+      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+      - "traefik.frontend.priority=1"
 #      - "traefik.frontend.headers.STSSeconds=315360000"
 #      - "traefik.frontend.headers.browserXSSFilter=true"
 #      - "traefik.frontend.headers.contentTypeNosniff=true"
@@ -253,8 +254,8 @@ services:
     domainname: ${DOMAINNAME}
     hostname: phpmyadmin
 #    restart: always
-    links:
-      - mariadb:db
+    depends_on:
+      - mariadb
 #    ports:
 #      - 82:80
     environment:
@@ -326,20 +327,24 @@ services:
 
 # MariaDB – Database Server for your Apps
   mariadb:
-    image: "linuxserver/mariadb"
-    container_name: "mariadb"
+    image: linuxserver/mariadb
+    container_name: mariadb
     domainname: ${DOMAINNAME}
     hostname: mariadb
 #  restart: always
     volumes:
-      - ${USERDIR}/dockerha/uavmariadb:/config
+      - ${USERDIR}/dockerha/uavmariadb:/var/lib/mysql
       - ${USERDIR}/dockerha/shared:/shared
+      - /etc/localtime:/etc/localtime:ro
+#    command:
+#      - "--transaction-isolation=READ-COMMITTED" 
+#      - "--binlog-format=ROW"
 #      - ${USERDIR}/dockerha/cert:/cert
-    ports:
-      - target: 3306
-        published: 3306
-        protocol: tcp
-        mode: host
+#    ports:
+#      - target: 3306
+#        published: 3306
+#        protocol: tcp
+#        mode: host
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${NEXTCLOUD_DATABASE}
@@ -350,6 +355,26 @@ services:
       - TZ=${TZ}
     networks:
       - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"
+      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /mariadb"
+      - "traefik.backend=mariadb"
+      - "traefik.port=3306"
+#      - "traefik.frontend.headers.SSLRedirect=true"
+      - "traefik.frontend.entryPoints=http"
+#      - "traefik.frontend.rule=HostRegexp:{catchall:.*}"
+#      - "traefik.frontend.priority=1"
+#      - "traefik.frontend.headers.STSSeconds=315360000"
+#      - "traefik.frontend.headers.browserXSSFilter=true"
+#      - "traefik.frontend.headers.contentTypeNosniff=true"
+#      - "traefik.frontend.headers.forceSTSHeader=true"
+#      - "traefik.frontend.headers.SSLHost=host"
+#      - "traefik.frontend.headers.STSIncludeSubdomains=true"
+#      - "traefik.frontend.headers.STSPreload=true"
+#      - "traefik.frontend.headers.frameDeny=true"
+#      - "traefik.frontend.entryPoints=http"
+#      - "traefik.docker.network=${NETWORK_NAME}"
 
 
 
