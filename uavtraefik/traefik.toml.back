@@ -20,14 +20,13 @@
   format = "json"
 
 debug = true
-keepTrailingSlash = false
+#keepTrailingSlash = false
 
 
 logLevel = "DEBUG" #"ERROR" #DEBUG, INFO, WARN, ERROR, FATAL, PANIC
 
 #InsecureSkipVerify = true
-defaultEntryPoints = ["http"]
-# defaultEntryPoints = ["http", "https"]
+defaultEntryPoints = ["http", "https"]
 
 # WEB interface of Traefik - it will show web page with overview of frontend an$
 [api]
@@ -52,7 +51,7 @@ defaultEntryPoints = ["http"]
 
 [file]
 watch = true
-  filename = "/etc/traefik/rules.toml"
+#  filename = "/etc/traefik/rules.toml"
 
 # Let's encrypt configuration
 #[acme]
@@ -71,14 +70,30 @@ watch = true
 
 # Connection to docker host system (docker.sock)
 
-#[docker]
-#Endpoint = "unix:///var/run/docker.sock"
-#Domain = "192.168.56.102"
+[docker]
+Endpoint = "unix:///var/run/docker.sock"
+Domain = "192.168.56.102"
 #Domain = "docker.localhost"
-#watch = true
-#swarmmode = true
-#network = "uavhanet"
+watch = true
+SwarmMode = true
+#network = "public"
+network = "uavhanet"
 # This will hide all docker containers that don't have explicitly
 # set label to "enable"
-#ExposedRyDefault = false
+ExposedRyDefault = false
 
+
+
+#[frontends]
+#  [frontends.hass]
+#  backend = "hass"
+#    [frontends.hass.routes.frontend_latest]
+#    rule = "Path: /frontend_latest"
+
+#[backends]
+#  [backends.hass]
+#    [backends.hass.servers.website]
+#    url = "https://1.2.3.4"
+#  [backends.error]
+#    [backends.error.servers.error]
+#    url = "http://2.3.4.5"
