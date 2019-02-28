@@ -176,6 +176,7 @@
 
 
 #####Nextcloud####
+<<<<<<< HEAD
 
   [frontends.nextcloud]
   entrypoints = ["http"]
@@ -201,6 +202,33 @@
       method = "drr"
 
 
+=======
+#
+#  [frontends.nextcloud]
+#  entrypoints = ["http", "https"]
+#  backend = "nextcloud"
+#  passHostHeader = true
+#    [frontends.nextcloud.routes.route_1]
+#    rule = "Host: 192.168.56.102; PathPrefixStrip: /nextcloud"
+#
+#  [backends.nextcloud]
+#    [backend.nextcloud.servers]
+#      [backends.nextcloud.servers.server1]
+#      url = "http://nextcloud:80"
+#      weight = 2
+#    [backends.nextcloud.loadBalancer]
+#      method = "drr"
+#
+#  [backends.mariadb]
+#    [backend.mariadb.servers]
+#      [backends.mariadb.servers.server1]
+#      url = "http://mariadb:80"
+#      weight = 2
+#    [backends.mariadb.loadBalancer]
+#      method = "drr"
+#
+#
+>>>>>>> 0fcfb0731e54829137126ed39f1c87cf295bcb3e
 #####Pma####
 #
 #  [frontends.pma]
