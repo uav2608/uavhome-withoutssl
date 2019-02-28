@@ -81,8 +81,6 @@ services:
     domainname: ${DOMAINNAME}
     hostname: watchtower
 #    restart: always
-#    ports:
-#      - "82:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --schedule "0 0 4 * * *" --cleanup
@@ -157,11 +155,11 @@ services:
     hostname: nextcloud
 #      restart: always
     volumes:
-      - ${USERDIR}/dockerha/uavnextcloud:/var/www/html
+      - ${USERDIR}/dockerha/uavnextcloud/data:/var/www/html
       - ${USERDIR}/dockerha/shared:/shared
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "9001:9001"
+      - "8081:80"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -174,27 +172,27 @@ services:
       - "traefik.enable=false"
 
 
-# phpMyAdmin - WebUI for MariaDB
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin
-    domainname: ${DOMAINNAME}
-    hostname: phpmyadmin
-#    restart: always
-    depends_on:
-      - mariadb
-    ports:
-      - "84:80"
-    environment:
-      - PMA_HOST=mariadb
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    networks:
-      - ${NETWORK_NAME}
-    labels:
-      - "traefik.enable=false"
+## phpMyAdmin - WebUI for MariaDB
+#  phpmyadmin:
+#    image: phpmyadmin/phpmyadmin
+#    container_name: phpmyadmin
+#    domainname: ${DOMAINNAME}
+#    hostname: phpmyadmin
+##    restart: always
+#    depends_on:
+#      - mariadb
+#    ports:
+#      - "84:80"
+#    environment:
+#      - PMA_HOST=mariadb
+#      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+#      - PUID=${PUID}
+#      - PGID=${PGID}
+#      - TZ=${TZ}
+#    networks:
+#      - ${NETWORK_NAME}
+#    labels:
+#      - "traefik.enable=false"
 
 
 
@@ -202,20 +200,20 @@ services:
 
 # MariaDB – Database Server for your NextCloud service
   mariadb:
-    image: linuxserver/mariadb
+    image: mariadb
     container_name: mariadb
     domainname: ${DOMAINNAME}
     hostname: mariadb
-#  restart: always
+#    restart: always
     volumes:
-      - ${USERDIR}/dockerha/uavmariadb:/var/lib/mysql
+      - ${USERDIR}/dockerha/uavmariadb/data:/var/lib/mysql
       - ${USERDIR}/dockerha/shared:/shared
       - /etc/localtime:/etc/localtime:ro
-#    command:
-#      - "--transaction-isolation=READ-COMMITTED" 
-#      - "--binlog-format=ROW"
-    ports:
-      - "3306:3306"
+    command:
+      - "--transaction-isolation=READ-COMMITTED" 
+      - "--binlog-format=ROW"
+#    ports:
+#      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${NEXTCLOUD_DATABASE}
@@ -238,7 +236,6 @@ services:
     build:
       context: ${USERDIR}/dockerha/ 
       dockerfile: Dockerfile.nodered
-#    image: nodered/node-red-docker:slim-v8
     container_name: node-red
     domainname: ${DOMAINNAME}
     hostname: nodered
@@ -314,7 +311,6 @@ services:
 
 ## Grafana  - Graphical data  presentation
   grafana:
-#    image: grafana/grafana
     build:
       context: ${USERDIR}/dockerha/
       dockerfile: Dockerfile.grafana
@@ -344,7 +340,6 @@ services:
 
 ## Influxdb  - Time series database 
   influxdb:
-#    image: influxdb
     build:
       context: ${USERDIR}/dockerha/
       dockerfile: Dockerfile.influxdb
@@ -367,7 +362,6 @@ services:
       - INFLUX_USER=${INFLUX_USER}
       - INFLUX_PASSWORD=${INFLUX_PASSWORD}
       - INFLUX_DB=${INFLUX_DB}
-#      - INFLUXDB_ADMIN_ENABLED=true
       - INFLUXDB_ADMIN_USER=${INFLUXDB_ADMIN_USER}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_ADMIN_PASSWORD}
       - INFLUXDB_DB=${INFLUXDB_DB}
