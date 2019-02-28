@@ -1,0 +1,6 @@
+FROM nodered/node-red-docker:slim-v8
+
+RUN npm install node-red-admin && \
+    npm install node-red-contrib-home-assistant-websocket && \
+    npm install node-red-node-mongodb && \
+    npm install node-red-dashboard && npm audit fix

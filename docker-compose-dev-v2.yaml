@@ -1,0 +1,364 @@
+version: "3.6"
+services:
+
+######## TEST @@@@@@@@@@@@@@@
+
+  traefik:
+    image: traefik:alpine
+    container_name: traefik
+    domainname: ${DOMAINNAME}
+    hostname: traefik
+#    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${USERDIR}/dockerha/uavtraefik:/etc/traefik
+      - ${USERDIR}/dockerha/shared:/shared
+      - ${USERDIR}/dockerha/cert:/cert
+    command:
+      - "--docker"
+      - "--api"
+      - "--logLevel=DEBUG"
+      - "--debug=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+#      - "traefik.frontend=traefik"
+#      - "traefik.backend=traefik"
+#      - "traefik.port=8080"
+#      - "traefik.frontend.rule=Host:${DOMAINNAME}; PathPrefixStrip: /traefik"
+#      - "traefik.backend=traefik"
+#      - "traefik.frontend.entryPoints=http" 
+
+
+  whoami:
+    image: containous/whoami
+    container_name: whoami
+    hostname: whoami
+    domainname: ${DOMAINNAME}
+#    restart: always
+#    ports:
+#      - "81:80"
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+
+#Portainer - WebUI for Containers
+  portainer:
+    image: portainer/portainer
+    container_name: portainer
+    domainname: ${DOMAINNAME}
+    hostname: portainer
+#    restart: always
+#    command: --no-auth
+#    ports:
+#      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${USERDIR}/dockerha/uavportainer/data:/data
+      - ${USERDIR}/dockerha/shared:/shared
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+# Watchtower - Automatic Update of Containers/Apps
+  watchtower:
+    image: v2tec/watchtower
+    container_name: watchtower
+    domainname: ${DOMAINNAME}
+    hostname: watchtower
+#    restart: always
+#    ports:
+#      - "82:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --schedule "0 0 4 * * *" --cleanup
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+#Openssl - self signed certificates for Containers
+  openssl:
+#    image: centos:7
+    build:
+      context: ${USERDIR}/dockerha/ #when alternative Dockerfile name used, context must be
+      dockerfile: Dockerfile.openssl
+    container_name: openssl
+    domainname: ${DOMAINNAME}
+    hostname: openssl
+#    ports:
+#      - "83:80"
+    volumes:
+      - ${USERDIR}/dockerha/cert:/cert
+      - ${USERDIR}/dockerha/shared/create-cert.sh:/shared/create-cert.sh
+    command:
+      - /bin/sh
+      - create-cert.sh
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+######### FRONTENDS ##########
+
+# Home Assistant - Smart Home Hub
+  homeassistant:
+    image: homeassistant/home-assistant
+    container_name: homeassistant
+    domainname: ${DOMAINNAME}
+    hostname: homeassistant
+#    restart: always
+#    devices:
+#      - /dev/ttyUSB0:/dev/ttyUSB0
+#      - /dev/ttyUSB1:/dev/ttyUSB1
+#      - /dev/ttyACM0:/dev/ttyACM0
+    volumes:
+      - ${USERDIR}/dockerha/uavha:/config
+      - /etc/localtime:/etc/localtime:ro
+      - ${USERDIR}/dockerha/shared:/shared
+#    ports:
+#      - "8123:8123"
+#    privileged: true
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+# NextCloud – Your Own Cloud Storage
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    domainname: ${DOMAINNAME}
+    hostname: nextcloud
+#      restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavnextcloud:/var/www/html
+      - ${USERDIR}/dockerha/shared:/shared
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "9001:9001"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    networks:
+      - ${NETWORK_NAME}
+    depends_on:
+      - mariadb
+    labels:
+      - "traefik.enable=false"
+
+
+# phpMyAdmin - WebUI for MariaDB
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    domainname: ${DOMAINNAME}
+    hostname: phpmyadmin
+#    restart: always
+    depends_on:
+      - mariadb
+    ports:
+      - "84:80"
+    environment:
+      - PMA_HOST=mariadb
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+
+######### UTILITIES ##########
+
+# MariaDB – Database Server for your NextCloud service
+  mariadb:
+    image: linuxserver/mariadb
+    container_name: mariadb
+    domainname: ${DOMAINNAME}
+    hostname: mariadb
+#  restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavmariadb:/var/lib/mysql
+      - ${USERDIR}/dockerha/shared:/shared
+      - /etc/localtime:/etc/localtime:ro
+#    command:
+#      - "--transaction-isolation=READ-COMMITTED" 
+#      - "--binlog-format=ROW"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${NEXTCLOUD_DATABASE}
+      - MYSQL_USER=${USER_NEXTCLOUD}
+      - MYSQL_PASSWORD=${PASS_NEXTCLOUD}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+
+######### HOME ASSISTANT RELATED ##########
+
+## NodeRed - Visualizing tasks
+  nodered:
+    image: nodered/node-red-docker:slim-v8
+    container_name: node-red
+    domainname: ${DOMAINNAME}
+    hostname: nodered
+#    restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavnodered:/data
+      - ${USERDIR}/dockerha/shared:/shared
+    command: ["npm", "install", "node-red-contrib-home-assistant-websocket"]
+    ports:
+      - "86:80"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+## Mosquitto - MQTT broker 
+  mosquitto:
+#    image: eclipse-mosquitto
+    build:
+      context: ${USERDIR}/dockerha/ 
+      dockerfile: Dockerfile.mosquitto
+    environment:
+      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
+      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
+#      - MOSQUITTO_USERNAME=mosquitto
+#      - MOSQUITTO_PASSWORD=Aropat0909
+#      - PUID=${PUIDMOSQUITTO}
+#      - PGID=${PGIDMOSQUITTO}
+#      - PUID=1000
+#      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+#    image: eclipse-mosquitto
+    container_name: mosquitto
+    domainname: ${DOMAINNAME}
+    hostname: mosquitto
+#    restart: on-failure
+    volumes:
+#      - ${USERDIR}/dockerha/uavmosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ${USERDIR}/dockerha/uavmosquitto/config:/mosquitto/config
+      - ${USERDIR}/dockerha/uavmosquitto/data:/mosquitto/data
+      - ${USERDIR}/dockerha/uavmosquitto/log:/mosquitto/log
+#      - ${USERDIR}/dockerha/shared:/shared
+#      - ${USERDIR}/dockerha/shared/mosquitto-pass.sh:/shared/mosquitto-pass.sh
+#    environment:
+#      - MOSQUITTO_USERNAME=${MOSQUITTO_USERNAME}
+#      - MOSQUITTO_PASSWORD=${MOSQUITTO_PASSWORD}
+#      - TZ=${TZ}
+#    command:
+#      - "/bin/sh"
+#      - "mosquitto-pass.sh"
+#      - "/usr/sbin/mosquitto"
+#      - "-c"
+#      - "/mosquitto/config/mosquitto.conf"
+#    ports:
+#      - "87:80"
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+## TasmodaAdmin - Visual admin for Tasmoda devices
+  tasmoadmin:
+    image: raymondmm/tasmoadmin
+    container_name: tasmoadmin
+    domainname: ${DOMAINNAME}
+    hostname: tasmoadmin
+#    restart: always
+    volumes:
+      - ${USERDIR}/dockerha/uavtasmoadmin/data:/data
+      - ${USERDIR}/dockerha/uavtasmoadmin/log:/log
+      - ${USERDIR}/dockerha/shared:/shared
+    ports:
+      - "88:80"
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+## Grafana  - Graphical data  presentation
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    domainname: ${DOMAINNAME}
+    hostname: grafana
+#    restart: always
+    ports:
+      - "89:80"
+    volumes:
+      - ${USERDIR}/dockerha/uavgrafana/data:/var/lib/grafana
+      - ${USERDIR}/dockerha/shared:/shared
+    environment:
+      - TZ=${TZ}
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+## Influxdb  - Time series database 
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    domainname: ${DOMAINNAME}
+    hostname: influxdb
+#    restart: on-failure
+    ports:
+      - "90:80"
+    volumes:
+      - ${USERDIR}/dockerha/uavinfluxdb/data:/var/lib/influxdb
+      - ${USERDIR}/dockerha/uavinfluxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
+      - ${USERDIR}/dockerha/shared:/shared
+    environment:
+      - TZ=${TZ}
+      - INFLUX_GRAPHITE_ENABLED='true'
+    networks:
+      - ${NETWORK_NAME}
+    labels:
+      - "traefik.enable=false"
+
+
+networks:
+  uavhanet:
+    driver: overlay

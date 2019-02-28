@@ -82,3 +82,33 @@ logger:
 
 weather: !include_dir_merge_list components/
 
+influxdb:
+  host: influxdb
+  port: 8086
+  database: !secret INFLUXDB_HADB
+  username: !secret INFLUXDB_HAUSER
+  password: !secret INFLUXDB_HAUSER_PASSWORD
+#  include:
+#    domains:
+#      - weather
+
+
+mqtt:
+  broker: !secret MQTT_IP
+  port: !secret MQTT_PORT
+  client_id: home-assistant
+  keepalive: 60
+  username: !secret MQTT_USER
+  password: !secret MQTT_PWD
+  discovery: true
+  discovery_prefix: homeassistant
+  birth_message:
+    topic: 'home-assistant/status'
+    payload: 'online'
+    qos: 1
+    retain: true
+  will_message:
+    topic: 'home-assistant/status'
+    payload: 'offline'
+    qos: 1
+    retain: true

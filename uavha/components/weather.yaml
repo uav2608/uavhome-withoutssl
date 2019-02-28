@@ -31,7 +31,11 @@
     - pressure
     - visibility
   update_interval:
-    minutes: 5
+    minutes: 30
 
+- platform: openweathermap
+  api_key: !secret openweather_api_key
+  latitude: !secret latitude
+  longitude: !secret longitude
 
 

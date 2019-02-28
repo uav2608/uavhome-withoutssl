@@ -1,0 +1,33 @@
+{
+  "name": "InfluxDB",
+  "type": "influxdb",
+  "url": "http://influxdb:8086",
+  "access": "proxy",
+  "user": "$INFLUX_USER",
+  "password": "$INFLUX_PASSWORD",
+  "database": "$INFLUX_DB",
+  "basicAuth": false
+}
+
+{
+  "name": "Telegraf",
+  "type": "influxdb",
+  "url": "http://influxdb:8086",
+  "access": "proxy",
+  "user": "$INFLUXDB_USER",
+  "password": "$INFLUXDB_USER_PASSWORD",
+  "database": "$INFLUXDB_DB",
+  "basicAuth": false
+}
+
+{
+  "name": "Homeassistant",
+  "type": "influxdb",
+  "url": "http://influxdb:8086",
+  "access": "proxy",
+  "user": "$INFLUXDB_HAUSER",
+  "password": "$INFLUXDB_HAUSER_PASSWORD",
+  "database": "$INFLUXDB_HADB",
+  "basicAuth": false
+}
+
