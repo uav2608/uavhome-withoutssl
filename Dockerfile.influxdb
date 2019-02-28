@@ -1,0 +1,11 @@
+FROM influxdb:1.3.1-alpine
+
+RUN mkdir /app
+
+WORKDIR /app
+
+COPY ./shared/influx-cmd.sh . 
+
+RUN chmod u+x influx-cmd.sh
+
+ENTRYPOINT ["/app/influx-cmd.sh"]

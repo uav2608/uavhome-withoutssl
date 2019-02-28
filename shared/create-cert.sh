@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 
 KEY_NAME="traefik"
 DOMAINNAME="docker.localhost"

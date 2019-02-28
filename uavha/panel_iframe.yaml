@@ -1,10 +1,19 @@
-#tasmoadmin:
-#  title: "TasmoAdmin"
-#  url: "http://10.0.0.40:80"
-#  icon: mdi:home-automation
+tasmoadmin:
+  title: "TasmoAdmin"
+  url: "http://192.168.56.102:88/"
+#  url: "http://tasmoadmin:80/"
+  icon: mdi:home-automation
 
-#nodered:
-##  title: "Node-Red"
-##  url: "http://10.0.0.172:1880"
-##  icon: mdi:nodejs
-#
+nodered:
+  title: "Node-Red"
+  url: "http://192.168.56.102/nodered/"
+#  url: "http://nodered:1880/"
+  icon: mdi:nodejs
+
+grafana:
+  title: "Grafana"
+  url: "http://192.168.56.102:3000/"
+#  url: "http://nodered:1880/"
+  icon: mdi:home-automation
+
+

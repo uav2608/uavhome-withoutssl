@@ -1,0 +1,11 @@
+FROM eclipse-mosquitto
+
+RUN mkdir /shared
+WORKDIR /shared
+
+COPY ./shared/mosquitto-pass.sh /shared/mosquitto-pass.sh
+
+ENTRYPOINT ["sh", "/shared/mosquitto-pass.sh"]
+
+CMD ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+

@@ -27,7 +27,7 @@
   backend = "hass"
   passHostHeader = true
     [frontends.hass.routes.route_1]
-    rule = "Host: 192.168.56.102; PathPrefixStrip: /hass"
+    rule = "Host: 192.168.56.102; PathPrefixStrip: /"
 
   [backends.hass]
     [backend.hass.servers]
@@ -78,88 +78,103 @@
 #
 #
 #####NodeRed####
-#
-#  [frontends.nodered]
-#  entrypoints = ["http", "https"]
-#  backend = "nodered"
-#  passHostHeader = true
-#    [frontends.nodered.routes.route_1]
-#    rule = "Host: 192.168.56.102; PathPrefixStrip: /nodered"
-#
-#  [backends.nodered]
-#    [backend.nodered.servers]
-#      [backends.nodered.servers.server1]
-#      url = "http://nodered:80"
-#      weight = 3
-#    [backends.nodered.loadBalancer]
-#      method = "drr"
-#
-#
+
+  [frontends.nodered]
+  entrypoints = ["http"]
+  backend = "nodered"
+  passHostHeader = true
+    [frontends.nodered.routes.route_1]
+    rule = "Host: 192.168.56.102; PathPrefixStrip: /nodered"
+
+  [backends.nodered]
+    [backend.nodered.servers]
+      [backends.nodered.servers.server1]
+      url = "http://nodered:1880"
+      weight = 3
+    [backends.nodered.loadBalancer]
+      method = "drr"
+
+
 #####Mosquitto####
-#
+
 #  [frontends.mosquitto]
-#  entrypoints = ["http", "https"]
+#  entrypoints = ["http"]
 #  backend = "mosquitto"
 #  passHostHeader = true
 #    [frontends.mosquitto.routes.route_1]
 #    rule = "Host: 192.168.56.102; PathPrefixStrip: /mosquitto"
-#
-#  [backends.mosquitto]
-#    [backend.mosquitto.servers]
-#      [backends.mosquitto.servers.server1]
-#      url = "http://mosquitto:80"
-#      weight = 4
-#    [backends.mosquitto.loadBalancer]
-#      method = "drr"
-#
-#
-#####Tasmoadmin####
-#
-#  [frontends.tasmoadmin]
-#  entrypoints = ["http", "https"]
-#  backend = "tasmoadmin"
-#  passHostHeader = true
-#    [frontends.tasmoadmin.routes.route_1]
-#    rule = "Host: 192.168.56.102; PathPrefixStrip: /tasmoadmin"
-#
-#  [backends.tasmoadmin]
-#    [backend.tasmoadmin.servers]
-#      [backends.tasmoadmin.servers.server1]
-#      url = "http://tasmoadmin:80"
-#      weight = 2
-#    [backends.tasmoadmin.loadBalancer]
-#      method = "drr"
-#
-#
-#####Grafana####
-#
-#[frontends]
-#  [frontends.grafana]
-#  entrypoints = ["http", "https"]
-#  backend = "grafana"
-#  passHostHeader = true
-#    [frontends.grafana.routes.route_1]
-#    rule = "Host: 192.168.56.102; PathPrefixStrip: /grafana"
-#
 
-#
-#  [backends.grafana]
-#    [backend.grafana.servers]
-#      [backends.grafana.servers.server1]
-#      url = "http://grafana:80"
+  [backends.mosquitto]
+    [backend.mosquitto.servers]
+      [backends.mosquitto.servers.server1]
+      url = "http://mosquitto:1883"
+      weight = 3
+    [backends.mosquitto.loadBalancer]
+      method = "drr"
+
+
+#####Tasmoadmin####
+
+  [frontends.tasmoadmin]
+  entrypoints = ["http"]
+  backend = "tasmoadmin"
+  passHostHeader = true
+    [frontends.tasmoadmin.routes.route_1]
+    rule = "Host: 192.168.56.102; PathPrefixStrip: /tasmoadmin, /login, /start"
+    priority = 1
+
+  [backends.tasmoadmin]
+    [backend.tasmoadmin.servers]
+      [backends.tasmoadmin.servers.server1]
+      url = "http://tasmoadmin:80"
+      weight = 2
+    [backends.tasmoadmin.loadBalancer]
+      method = "drr"
+
+
+#####Grafana####
+
+  [frontends.grafana]
+  entrypoints = ["http"]
+  backend = "grafana"
+  passHostHeader = true
+    [frontends.grafana.routes.route_1]
+    rule = "Host: 192.168.56.102; PathPrefixStrip: /grafana"
+
+    [backend.grafana.servers]
+      [backends.grafana.servers.server1]
+      url = "http://grafana:3000"
+      weight = 2
+    [backends.grafana.loadBalancer]
+      method = "drr"
+
+#####Influxdb####
+
+#  [frontends.influxdb]
+#  entrypoints = ["http"]
+#  backend = "influxdb"
+#  passHostHeader = true
+#    [frontends.influxdb.routes.route_1]
+#    rule = "Host: 192.168.56.102; PathPrefixStrip: /influxdb"
+
+
+  [backends.influxdb]
+    [backend.influxdb.servers]
+      [backends.influxdb.servers.server1]
+      url = "http://influxdb:8086"
+      weight = 2
+    [backends.influxdb.loadBalancer]
+      method = "drr"
+
+#  [backends.telegraf]
+#    [backend.telegraf.servers]
+#      [backends.telegraf.servers.server1]
+#      url = "http://influxdb:8086"
 #      weight = 2
-#    [backends.grafana.loadBalancer]
+#    [backends.telegraf.loadBalancer]
 #      method = "drr"
-#
-#  [backends.influxdb]
-#    [backend.influxdb.servers]
-#      [backends.influxdb.servers.server1]
-#      url = "http://influxdb:80"
-#      weight = 2
-#    [backends.influxdb.loadBalancer]
-#      method = "drr"
-#
-#
+
+
 #####Nextcloud####
 #
 #  [frontends.nextcloud]
